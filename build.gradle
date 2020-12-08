@@ -1,0 +1,80 @@
+group 'ru.sbtqa.tag.pagefactory2example'
+version '1.0'
+defaultTasks 'test'
+
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "io.qameta.allure:allure-gradle:2.8.1"
+    }
+}
+
+apply plugin: 'io.qameta.allure'
+apply plugin: 'maven'
+apply plugin: 'java'
+apply plugin: 'maven-publish'
+apply plugin: 'java-library'
+sourceCompatibility = 1.11
+
+allure {
+    autoconfigure = false
+    aspectjweaver = true
+    version = '2.13.0'
+    resultsDir = file("${project.buildDir.path}/allure-results")
+    reportDir = file('/allure-report')
+}
+repositories {
+    mavenCentral()
+}
+def pf2version = "15.10.0"
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    compile group: 'com.google.code.gson', name: 'gson', version: '2.8.2'
+    compile group: 'io.github.longphamduc', name: 'courgette-jvm', version: '1.0.9'
+    compile group: 'ru.sbtqa.tag.pagefactory', name: 'html-plugin', version: pf2version
+    compile group: 'ru.sbtqa.tag.pagefactory', name: 'web-plugin', version: pf2version
+    compile group: 'ru.sbtqa.tag.pagefactory', name: 'rest-plugin', version: pf2version
+    compile group: 'ru.sbtqa.tag.pagefactory', name: 'web-plugin', version: pf2version
+    compile group: 'ru.yandex.qatools.htmlelements', name: 'htmlelements-java', version: '1.20.0'
+    compile group: 'ru.sbtqa.tag.datajack.providers', name: 'json-provider', version: '5.1.2'
+}
+compileJava.options.encoding = 'UTF-8'
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+test {
+    systemProperties System.properties
+//    onlyIf {
+//        project.hasProperty("doUITest")
+}
+
+tasks.withType(Test) {
+    systemProperties = System.getProperties()
+}
+
+task runCucumber(type: Test) {
+    include '**/ru/sbtqa/tag/pagefactory/CucumberTest.class'
+    outputs.upToDateWhen { false }
+//    testLogging.showStandardStreams = true
+//    testLogging.exceptionFormat = 'full'
+}
+
+task runParallel(type: Test) {
+    include '**/com/asuproject/ufam/CourgateTest.class'
+    outputs.upToDateWhen { false }
+}
+
+task runScenario(type: Test) {
+    include '**/com/asuproject/ufam/CourgateScenarioTest.class'
+    outputs.upToDateWhen { false }
+}
+
+task runThreadsIA(type: Test) {
+    include '**/com/asuproject/ufam/CourgateThreadRunTest.class'
+    outputs.upToDateWhen { false }
+}
